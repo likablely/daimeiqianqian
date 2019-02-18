@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>贪吃蛇</title>
+	<style type="text/css">
+		.gamePlace canvas {
+			position:absolute;
+			left:0px;
+			top:0px;
+		}
+	</style>
+	<script type="text/javascript">
+		//var
+		var ctx_snake=null;	//绘图对象_蛇
+		var ctx_background=null;//绘图对象_背景
+		var interval=null;	//计时器
+		var toGo=3;	//行进方向
+		var snake=[];	//蛇身数组
+		var snakeCount=4;	//蛇长单位
+		var foodX=0;
+		var foodY=0;
+		//初始网格行列数
+		var num=20;
+		var row=num;	//行数
+		var col=num;	//列数
+		var cell_size=500/num;	//单位边长
+		//绘制网格
+		function drawGrid() {
+			ctx_background.beginPath();
+			for(var i=0;i<=500;i=i+cell_size) {
+				ctx_background.moveTo(0,i);	//横线
+				ctx_background.lineTo(500,i);
+				ctx_background.moveTo(i,0);	//竖线
+				ctx_background.lineTo(i,500);
+			}
+			ctx_background.strokeStyle="black";	//线段颜色
+			ctx_background.stroke();		
+			ctx_background.closePath();
+		}
+		//蛇身初始位置
+		for(var i=0;i<snakeCount;i++) {
+			snake[i]={x: i*cell_size,y: 0}
+		}
+		//绘制蛇身
+		function drawSnake() {
+			for(var i=0;i<snake.length;i++) {
+				ctx_snake.beginPath();
+				ctx_snake.fillStyle="black";	//蛇身颜色
+				ctx_snake.fillRect(snake[i].x,snake[i].y,cell_size,cell_size);
+				ctx_snake.closePath();
+			}
+		}
+		//绘制食物
+		function drawFood() {
+			ctx_snake.beginPath();
+			//随机生成食物坐标
+			// do {
+				foodX=Math.floor(Math.random()*(num-1))*cell_size;	
+				foodY=Math.floor(Math.random()*(num-1))*cell_size;
+			// }while();
+			for(var i=0;i<=snake[snakeCount-1];i++) {
+				if(snake[i].x==foodX && snake[i].y==foodY) {
+					drawFood();
+				}
+			}
+			
+			ctx_snake.fillStyle="yellow";	//食物颜色
+			ctx_snake.fillRect(foodX,foodY,cell_size,cell_size);
+			ctx_snake.closePath();
+		}
+		//键盘控制
+		function keyDown(e) {
+			switch(e.keyCode){
+				case 37: //左边
+					if(toGo!=1 && toGo!=3){toGo=1}
+					break;
+				case 38: //上边
+					if(toGo!=2 && toGo!=4){toGo=2}
+					break;
+				case 39: //右边
+					if(toGo!=1 && toGo!=3){toGo=3}
+					break;
+				case 40: //下边
+					if(toGo!=2 && toGo!=4){toGo=4}
+					break;
+				default:
+					alert(5);break;
+				}
+		}
+		//蛇身移动
+		function move() {
+			ctx_snake.clearRect(snake[0].x,snake[0].y,cell_size,cell_size);
+			// snake.unshirf({x: snake[1].x+cell_size,y: snake[1].y});
+			// snake.pop();
+			
+			switch(toGo){
+				case 1: //左边
+					snake.push({x: snake[snakeCount-1].x-cell_size,y: snake[snakeCount-1].y});
+					break;
+				case 2: //上边
+					snake.push({x: snake[snakeCount-1].x,y: snake[snakeCount-1].y-cell_size});
+					break;
+				case 3: //右边
+					snake.push({x: snake[snakeCount-1].x+cell_size,y: snake[snakeCount-1].y});
+					break;
+				case 4: //下边
+					snake.push({x: snake[snakeCount-1].x,y: snake[snakeCount-1].y+cell_size});
+					break;
+				default:
+					break;
+			}
+			eat();
+			// snake.push({x: snake[snakeCount-1].x+cell_size,y: snake[snakeCount-1].y});
+			snake.shift();//alert(snake[0].x+"/"+snake.length);
+			drawSnake();
+			die();
+		}
+		//死亡判定
+		function die() {
+			for(var i=0;i<snakeCount-1;i++) {	//身体叠加
+				if(snake[i].x==snake[snakeCount-1].x && snake[i].y==snake[snakeCount-1].y) {
+					clearInterval(interval);alert("身体叠加");
+					window.location.reload();
+				}
+			}
+			if(snake[snakeCount-1].x==-cell_size || snake[snakeCount-1].x==500 || snake[snakeCount-1].y==-cell_size || snake[snakeCount-1].y==500) {	//碰撞边界
+				clearInterval(interval);alert("碰撞边界");
+				window.location.reload();
+			}
+		}
+		//进食判定
+		function eat() {
+			if(snake[snakeCount-1].x==foodX && snake[snakeCount-1].y==foodY) {
+				drawFood();
+				snakeCount++;
+				snake.unshift({x: 0,y: 0});
+			}
+		}
+
+		//启动函数
+		window.onload=function() {
+			ctx_snake=document.getElementById("canvas_snake").getContext("2d");
+			ctx_background=document.getElementById("canvas_background").getContext("2d");
+			drawGrid();
+			drawSnake();
+			drawFood();
+
+			var z=0;
+			if(z==0){interval=setInterval(move,100);}
+			
+			document.onkeydown=keyDown;
+		}
+	</script>
+</head>
+<body>
+	<div class="gamePlace">
+		
+		<canvas id="canvas_snake" width="500" height="500" style="border: 1px solid #f00">
+		您的浏览器不支持 HTML5 canvas 标签。
+		</canvas>
+		<canvas id="canvas_background" width="500" height="500" style="border: 1px solid #0f0"></canvas>
+	</div>
+</body>
+</html>
